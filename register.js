@@ -38,6 +38,6 @@ form.addEventListener("submit", async (e) => {
     errorMsg.textContent = dbErr.message;
   } else {
     alert("Registered! Please verify your email.");
-    window.location.href = "login.html";
+    window.location.href = "verify.html";
   }
 });
