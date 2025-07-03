@@ -1,36 +1,38 @@
-// Initialize Supabase
-const supabase = window.supabase.createClient(
+
+const supabase = supabase.createClient(
   'https://wlthlwxcmltwescezjlk.supabase.co', // ⬅️ Replace with your Supabase URL
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o'                 // ⬅️ Replace with your Supabase anon key
+
 );
 
-// Login form handler
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  const email = this.email.value.trim();
-  const password = this.password.value;
+  const form = e.target;
   const errorDiv = document.getElementById("error");
+  errorDiv.style.display = "none"; errorDiv.textContent = "";
 
-  // Clear any previous error
-  errorDiv.style.display = "none";
+  const email = form.email.value.trim();
+  const password = form.password.value;
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) throw authError;
 
-    if (error) {
-      errorDiv.textContent = error.message;
-      errorDiv.style.display = "block";
-    } else {
-      // ✅ Successfully signed in — redirect to dashboard
-      window.location.href = "dashboard.html";
-    }
+    const userId = authData.user.id;
+    const { data: admins, error: dbError } = await supabase
+      .from('admins')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (dbError) throw dbError;
+    if (!admins) throw new Error("Admin record not found");
+
+    const role = admins.role;
+    window.location.href = role === 'superadmin' ? 'main_admin_dashboard.html' : 'dashboard.html';
   } catch (err) {
-    errorDiv.textContent = "Unexpected error occurred. Please try again.";
+    console.error(err);
+    errorDiv.textContent = err.message || "Invalid email or password!";
     errorDiv.style.display = "block";
-    console.error("Login Error:", err);
   }
 });
