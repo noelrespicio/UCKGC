@@ -1,74 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Verify Email | UCKGC</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background: url('cover/walpaper.jpg') no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      color: #fff;
+      background: url('cover/walpaper.jpg') center/cover fixed;
+      height:100vh;display:flex;justify-content:center;align-items:center;color:#fff;margin:0;
     }
-    .verify-container {
-      background: rgba(255,255,255,0.2);
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      backdrop-filter: blur(5px);
+    .container {
+      background:rgba(255,255,255,0.2); padding:30px; border-radius:15px;
+      backdrop-filter:blur(5px); max-width:400px; width:90%; text-align:center;
     }
-    .form-control, .btn-verify {
-      border-radius: 10px;
-      margin-top: 10px;
+    .form-control, .btn-verify { margin-top:10px; border-radius:10px; }
+    .spinner { display:none; margin:10px auto; border:4px solid rgba(255,255,255,0.3);
+      border-top:4px solid #fff; border-radius:50%; width:30px;height:30px;
+      animation:spin 1s linear infinite;
     }
-    .error-message { color: #ffdddd; }
-    .success-message { color: #ddffdd; }
-    .loading-spinner {
-      display: none;
-      margin: auto;
-      border: 4px solid rgba(255,255,255,0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .footer {
-      position: fixed; bottom: 0;
-      width: 100%; padding: 10px;
-      background: rgba(0,121,107,0.5);
-    }
+    @keyframes spin { to { transform:rotate(360deg);} }
+    .msg { margin-top:10px; font-size:0.9rem; }
+    .msg.error { color:#ff8c8c; } .msg.success { color:#8cff8c; }
   </style>
 </head>
 <body>
-  <div class="verify-container">
-    <div class="loading-spinner" id="spinner"></div>
+  <div class="container">
+    <div class="spinner" id="spinner"></div>
     <h2>Email Verification</h2>
-    <p id="feedback"></p>
+    <div id="msg" class="msg"></div>
     <form id="verifyForm">
-      <input type="text" id="code" class="form-control" placeholder="Verification Code" required />
-      <button type="submit" class="btn btn-success btn-verify w-100">Verify</button>
+      <input type="text" id="code" class="form-control" placeholder="Verification Code" required>
+      <button type="submit" class="btn btn-verify btn-success w-100">Verify</button>
     </form>
     <p class="mt-3">
-      Didn’t get it?
-      <button id="resendBtn" class="btn btn-link">Resend Code</button>
+      Didn't receive? <button id="resend" class="btn btn-link">Resend</button>
     </p>
   </div>
-  <div class="footer">&copy; 2024 UCKGC Phil. All Rights Reserved.</div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="verify.js"></script>
+  <script>
+    const supabase = supabase.createClient('https://wlthlwxcmltwescezjlk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o');
+    const email = new URLSearchParams(location.search).get('email');
+    const spinner = document.getElementById('spinner');
+    const msg = document.getElementById('msg');
+
+    document.getElementById('verifyForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      msg.textContent=''; msg.className='msg';
+      spinner.style.display = 'block';
+
+      const entered = parseInt(document.getElementById('code').value);
+      const { data, error } = await supabase
+        .from('email_verifications')
+        .select('*').eq('email', email).single();
+
+      spinner.style.display='none';
+      if (error || !data || data.code !== entered) {
+        msg.textContent = 'Invalid code'; msg.className='msg error';
+        return;
+      }
+
+      // Successful: move to admins
+      const { error:adminErr } = await supabase
+        .from('admins').insert([{ email, password_hash:data.password_hash, location:data.location, role:'admin', status:'pending' }]);
+      await supabase.from('email_verifications').delete().eq('email', email);
+
+      if (adminErr) {
+        msg.textContent = 'Error finalizing registration'; msg.className='msg error';
+      } else {
+        msg.textContent = 'Registered! Please await approval.'; msg.className='msg success';
+        setTimeout(() => location.href='login.html',2000);
+      }
+    });
+
+    document.getElementById('resend').addEventListener('click', async () => {
+      spinner.style.display='block';
+      const { error } = await supabase.functions.invoke('send_verification', { body:{email} });
+      spinner.style.display='none';
+      msg.textContent = error ? error.message : 'Code resent!'; msg.className = error?'msg error':'msg success';
+    });
+  </script>
 </body>
 </html>
