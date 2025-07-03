@@ -1,7 +1,7 @@
 // Initialize Supabase
 const supabase = window.supabase.createClient(
   'https://wlthlwxcmltwescezjlk.supabase.co', // ⬅️ Replace with your Supabase URL
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o'                 // ⬅️ Replace with your Supabase anon key
+  'process.env.SUPABASE_KEY'                 // ⬅️ Replace with your Supabase anon key
 );
 
 // Login form handler
