@@ -49,8 +49,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabase = supabase.createClient(
-      'https://wlthlwxcmltwescezjlk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o'
+      'https://wlthlwxcmltwescezjlk.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o'
     );
+
     const form = document.getElementById('regForm');
     const msg = document.getElementById('msg');
     const spinner = document.getElementById('spinner');
@@ -63,31 +65,35 @@
       const { email, password, confirm, location } = form;
       if (password.value !== confirm.value) {
         spinner.style.display = 'none';
-        msg.textContent = "Passwords don't match"; msg.classList.add('error');
+        msg.textContent = "Passwords don't match";
+        msg.classList.add('error');
         return;
       }
 
       const code = Math.floor(100000 + Math.random()*900000);
+
       const { error:insertErr } = await supabase
         .from('email_verifications')
         .insert([{ email:email.value, password_hash: password.value, location:location.value, code }]);
 
       if (insertErr) {
         spinner.style.display = 'none';
-        msg.textContent = "Error storing verification."; msg.classList.add('error');
+        msg.textContent = "Error storing verification.";
+        msg.classList.add('error');
         return;
       }
 
-      // Call Edge Function to send email
       const { error:fnErr } = await supabase.functions.invoke('send_verification', {
         body: { email: email.value, code }
       });
 
       spinner.style.display = 'none';
       if (fnErr) {
-        msg.textContent = "Failed to send email."; msg.classList.add('error');
+        msg.textContent = "Failed to send email.";
+        msg.classList.add('error');
       } else {
-        msg.textContent = "Verification code sent to your email."; msg.classList.add('success');
+        msg.textContent = "Verification code sent to your email.";
+        msg.classList.add('success');
         setTimeout(() => window.location = `verify.html?email=${encodeURIComponent(email.value)}`, 1500);
       }
     });
