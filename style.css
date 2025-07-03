@@ -1,0 +1,77 @@
+body {
+    background: url('cover/walpaper.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    color: #fff;
+}
+
+.homepage-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.0);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    width: 90%;
+    margin-top: 0px;
+}
+
+.homepage-container img {
+    width: 140px;
+    height: auto;
+}
+
+.text-content {
+    text-align: left;
+}
+
+.text-content h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.text-content p {
+    font-size: 1.1rem;
+    color: #e6e6e6;
+    margin-bottom: 5px;
+}
+
+.login-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.login-button .btn {
+    background-color: rgba(0, 121, 107, 0.8);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-button .btn:hover {
+    background-color: rgba(0, 77, 64, 0.8);
+    transform: scale(1.05);
+}
+
+.footer {
+    margin-top: auto;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(0, 121, 107, 0.8);
+    color: white;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+}
