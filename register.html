@@ -115,7 +115,8 @@
   </div>
 
   <script>
-    const supabase = supabase.createClient(
+    const { createClient } = supabase;
+    const supabaseClient = createClient(
       'https://wlthlwxcmltwescezjlk.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsdGhsd3hjbWx0d2VzY2V6amxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDQ4MDcsImV4cCI6MjA2NzAyMDgwN30.tvUeTFVDdQomDHHV0JSpsXHP9IbQVkOhEvBpCglzI-o'
     );
@@ -142,8 +143,7 @@
 
       loadingSpinner.style.display = "block";
 
-      // Check if email already exists
-      const { data: existing, error: checkError } = await supabase
+      const { data: existing, error: checkError } = await supabaseClient
         .from("admins")
         .select("id")
         .eq("email", email)
@@ -155,8 +155,7 @@
         return;
       }
 
-      // Insert new admin with role
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from("admins")
         .insert([{
           email,
@@ -175,7 +174,7 @@
         console.error(error);
       } else {
         alert("Successfully registered! Please check your email for the verification code.");
-        window.location.href = "verify.html"; // You must create this page
+        window.location.href = "verify.html"; // make sure this page exists
       }
     });
   </script>
